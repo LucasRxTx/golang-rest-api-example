@@ -3,20 +3,19 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"rest-api/dao"
+	"rest-api/domain"
 	"strings"
 )
 
 type IUserFriendsRepo interface {
 	Update(tx *sql.Tx, userId string, friends []string) error
 	Delete(tx *sql.Tx, userId string, friendId string) error
-	GetAllForUserId(tx *sql.Tx, id string) ([]dao.UserFriendDao, error)
+	GetAllForUserId(tx *sql.Tx, id string) ([]domain.UserFriend, error)
 }
 
-type UserFriendsRepository struct {
-}
+type UserFriendsRepository struct{}
 
-func (repo *UserFriendsRepository) GetAllForUserId(tx *sql.Tx, id string) ([]dao.UserFriendDao, error) {
+func (repo *UserFriendsRepository) GetAllForUserId(tx *sql.Tx, id string) ([]domain.UserFriend, error) {
 	rows, err := tx.Query(`
 		SELECT
 			f.id AS friend_id,
@@ -37,15 +36,15 @@ func (repo *UserFriendsRepository) GetAllForUserId(tx *sql.Tx, id string) ([]dao
 	)
 
 	if err != nil {
-		return []dao.UserFriendDao{}, err
+		return []domain.UserFriend{}, err
 	}
 
-	var friendsList []dao.UserFriendDao
-	var friend dao.UserFriendDao
+	var friendsList []domain.UserFriend
+	var friend domain.UserFriend
 	for rows.Next() {
 		err = rows.Scan(&friend.Id, &friend.Name, &friend.Highscore)
 		if err != nil {
-			return []dao.UserFriendDao{}, err
+			return []domain.UserFriend{}, err
 		}
 		friendsList = append(friendsList, friend)
 	}
@@ -56,17 +55,9 @@ func (repo *UserFriendsRepository) GetAllForUserId(tx *sql.Tx, id string) ([]dao
 func (repo *UserFriendsRepository) Delete(tx *sql.Tx, userId string, friendId string) error {
 	query := `DELETE FROM game_friends WHERE user_id = $1 AND friend_id = $2;`
 	fmt.Println("user_id", userId, "friend_id", friendId)
-	result, err := tx.Exec(query, userId, friendId)
-	if err != nil {
-		fmt.Printf("There was an error %s\n", err.Error())
-		return err
-	}
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("There was no error: %d\n", rows)
-	return nil
+	_, err := tx.Exec(query, userId, friendId)
+
+	return err
 }
 
 func (repo *UserFriendsRepository) Update(tx *sql.Tx, id string, friends []string) error {
@@ -119,7 +110,6 @@ func (repo *UserFriendsRepository) Update(tx *sql.Tx, id string, friends []strin
 
 	if len(friendsToDelete) > 0 {
 		for _, friendId := range friendsToDelete {
-			fmt.Printf("Deleting %s\n", friendId)
 			err = repo.Delete(tx, id, friendId)
 			if err != nil {
 				return err

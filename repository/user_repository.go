@@ -2,20 +2,18 @@ package repository
 
 import (
 	"database/sql"
-	"errors"
-	"rest-api/dao"
+	"rest-api/domain"
 
 	"github.com/google/uuid"
 )
 
 type IUserRepository interface {
 	Create(tx *sql.Tx, name string) (uuid.UUID, error)
-	GetById(tx *sql.Tx, id string) (dao.UserDao, error)
-	GetAll(tx *sql.Tx) ([]dao.UserDao, error)
+	GetById(tx *sql.Tx, id string) (domain.User, error)
+	GetAll(tx *sql.Tx) ([]domain.User, error)
 }
 
-type UserRepository struct {
-}
+type UserRepository struct{}
 
 func (repo *UserRepository) Create(tx *sql.Tx, userName string) (uuid.UUID, error) {
 	var newUserId = uuid.New()
@@ -32,45 +30,39 @@ func (repo *UserRepository) Create(tx *sql.Tx, userName string) (uuid.UUID, erro
 	return newUserId, nil
 }
 
-func (repo *UserRepository) GetById(tx *sql.Tx, id string) (dao.UserDao, error) {
-	rows, err := tx.Query(`SELECT * FROM game_user WHERE id = $1 LIMIT 1;`, id)
+func (repo *UserRepository) GetById(tx *sql.Tx, id string) (domain.User, error) {
+	rows := tx.QueryRow(`SELECT * FROM game_user WHERE id = $1 LIMIT 1;`, id)
+
+	var user domain.User
+	err := rows.Scan(&user.Id, &user.Name)
 	if err != nil {
-		return dao.UserDao{}, err
-	}
-
-	defer rows.Close()
-
-	var user dao.UserDao
-	for rows.Next() {
-		err = rows.Scan(&user.Id, &user.Name)
-		if err != nil {
-			return dao.UserDao{}, err
-		}
-	}
-
-	if user.Id.String() == "" {
-		return dao.UserDao{}, errors.New("user_repository: User not found")
+		return domain.User{}, err
 	}
 
 	return user, nil
 }
 
-func (repo *UserRepository) GetAll(tx *sql.Tx) ([]dao.UserDao, error) {
+func (repo *UserRepository) GetAll(tx *sql.Tx) ([]domain.User, error) {
 	rows, err := tx.Query(`SELECT * FROM game_user;`)
 	if err != nil {
-		return []dao.UserDao{}, err
+		return []domain.User{}, err
 	}
 
 	defer rows.Close()
 
-	var users []dao.UserDao
-	var user dao.UserDao
+	var users []domain.User
+	var user domain.User
 	for rows.Next() {
 		err = rows.Scan(&user.Id, &user.Name)
 		if err != nil {
-			return []dao.UserDao{}, err
+			return []domain.User{}, err
 		}
 		users = append(users, user)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return []domain.User{}, err
 	}
 
 	return users, nil

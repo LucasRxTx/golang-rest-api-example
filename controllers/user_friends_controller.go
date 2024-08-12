@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"rest-api/dto"
 	"rest-api/services"
 
@@ -24,9 +25,9 @@ func (controller *UserFriendsController) GetFriendsByUserId(c *gin.Context) {
 	userFriends, err := controller.UserService.GetAllFriends(uriParams.Id)
 
 	if err != nil {
-		c.JSON(500, dto.ErrorDto{
-			Message: err.Error(),
-		})
+		log.Println("Error getting all user friends:", err)
+		c.Error(err)
+		c.Status(500)
 		return
 	}
 
@@ -68,11 +69,11 @@ func (controller *UserFriendsController) UpdateFriends(c *gin.Context) {
 	err = controller.UserService.UpdateFriends(uriParams.Id, request.Friends)
 
 	if err != nil {
-		c.JSON(500, dto.ErrorDto{
-			Message: err.Error(),
-		})
+		log.Println("Error updating user friends:", err.Error())
+		c.Error(err)
+		c.Status(500)
 		return
 	}
 
-	c.JSON(201, gin.H{})
+	c.Status(201)
 }

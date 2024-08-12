@@ -2,7 +2,7 @@ package services
 
 import (
 	"database/sql"
-	"rest-api/dao"
+	"rest-api/domain"
 	"rest-api/repository"
 
 	"github.com/google/uuid"
@@ -10,12 +10,12 @@ import (
 
 type IUserService interface {
 	CreateUser(name string) (uuid.UUID, error)
-	GetUserById(id string) (dao.UserDao, error)
-	GetAll() ([]dao.UserDao, error)
-	GetGameState(id string) (dao.GameStateDao, error)
+	GetUserById(id string) (domain.User, error)
+	GetAll() ([]domain.User, error)
+	GetGameState(id string) (domain.GameState, error)
 	UpdateGameState(id string, gamesPlayer int, score int) error
 	UpdateFriends(id string, friends []string) error
-	GetAllFriends(id string) ([]dao.UserFriendDao, error)
+	GetAllFriends(id string) ([]domain.UserFriend, error)
 }
 
 type UserService struct {
@@ -25,9 +25,9 @@ type UserService struct {
 	UserFreindsRepo repository.IUserFriendsRepo
 }
 
-func (userService *UserService) GetAllFriends(userId string) ([]dao.UserFriendDao, error) {
-	fail := func(err error) ([]dao.UserFriendDao, error) {
-		return []dao.UserFriendDao{}, err
+func (userService *UserService) GetAllFriends(userId string) ([]domain.UserFriend, error) {
+	fail := func(err error) ([]domain.UserFriend, error) {
+		return []domain.UserFriend{}, err
 	}
 
 	tx, err := userService.Db.Begin()
@@ -70,9 +70,9 @@ func (userService *UserService) UpdateFriends(id string, friends []string) error
 	return nil
 }
 
-func (userService *UserService) GetAll() ([]dao.UserDao, error) {
-	fail := func(err error) ([]dao.UserDao, error) {
-		return []dao.UserDao{}, err
+func (userService *UserService) GetAll() ([]domain.User, error) {
+	fail := func(err error) ([]domain.User, error) {
+		return []domain.User{}, err
 	}
 
 	tx, err := userService.Db.Begin()
@@ -95,9 +95,9 @@ func (userService *UserService) GetAll() ([]dao.UserDao, error) {
 	return users, nil
 }
 
-func (userService *UserService) GetUserById(id string) (dao.UserDao, error) {
-	fail := func(err error) (dao.UserDao, error) {
-		return dao.UserDao{}, err
+func (userService *UserService) GetUserById(id string) (domain.User, error) {
+	fail := func(err error) (domain.User, error) {
+		return domain.User{}, err
 	}
 
 	tx, err := userService.Db.Begin()
@@ -150,9 +150,9 @@ func (userService *UserService) CreateUser(name string) (uuid.UUID, error) {
 	return uuid, nil
 }
 
-func (userService *UserService) GetGameState(userId string) (dao.GameStateDao, error) {
-	fail := func(err error) (dao.GameStateDao, error) {
-		return dao.GameStateDao{}, err
+func (userService *UserService) GetGameState(userId string) (domain.GameState, error) {
+	fail := func(err error) (domain.GameState, error) {
+		return domain.GameState{}, err
 	}
 
 	tx, err := userService.Db.Begin()

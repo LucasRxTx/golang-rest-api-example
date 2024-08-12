@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"rest-api/dto"
 	"rest-api/services"
 
@@ -28,32 +29,24 @@ func (controller *UserController) CreateUser(c *gin.Context) {
 
 	userId, err := controller.UserService.CreateUser(createUserRequest.Name)
 	if err != nil {
-		c.JSON(500, dto.ErrorDto{
-			Message: err.Error(),
-		})
-		return
-	}
-
-	user, err := controller.UserService.GetUserById(userId.String())
-	if err != nil {
-		c.JSON(500, dto.ErrorDto{
-			Message: err.Error(),
-		})
+		log.Println("Error creating user:", err.Error())
+		c.Error(err)
+		c.Status(500)
 		return
 	}
 
 	c.JSON(201, dto.UserDto{
-		Id:   user.Id.String(),
-		Name: user.Name,
+		Id:   userId.String(),
+		Name: createUserRequest.Name,
 	})
 }
 
 func (controller *UserController) GetUsers(c *gin.Context) {
 	users, err := controller.UserService.GetAll()
 	if err != nil {
-		c.JSON(500, dto.ErrorDto{
-			Message: err.Error(),
-		})
+		log.Println("Error getting users", err.Error())
+		c.Error(err)
+		c.Status(500)
 		return
 	}
 
@@ -84,9 +77,9 @@ func (controller *UserController) GetUserById(c *gin.Context) {
 
 	user, err := controller.UserService.GetUserById(uriParams.Id)
 	if err != err {
-		c.JSON(500, dto.ErrorDto{
-			Message: err.Error(),
-		})
+		log.Println("Error getting user by id", err.Error())
+		c.Error(err)
+		c.Status(500)
 		return
 	}
 

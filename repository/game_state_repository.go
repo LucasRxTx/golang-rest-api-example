@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"rest-api/dao"
+	"rest-api/domain"
 
 	"github.com/google/uuid"
 )
@@ -11,72 +11,71 @@ import (
 type IGameStateRepository interface {
 	Create(tx *sql.Tx, userId string, gamesPlayed int, score int) (uuid.UUID, error)
 	Update(tx *sql.Tx, gameId string, gamesPlayed int, score int) error
-	GetById(tx *sql.Tx, id string) (dao.GameStateDao, error)
-	GetByUserId(tx *sql.Tx, id string) (dao.GameStateDao, error)
+	GetById(tx *sql.Tx, id string) (domain.GameState, error)
+	GetByUserId(tx *sql.Tx, id string) (domain.GameState, error)
 }
 
-type GameStateRepository struct {
-}
+type GameStateRepository struct{}
 
-func (repo *GameStateRepository) GetById(tx *sql.Tx, id string) (dao.GameStateDao, error) {
+func (repo *GameStateRepository) GetById(tx *sql.Tx, id string) (domain.GameState, error) {
 	rows, err := tx.Query(
 		`SELECT * FROM game_state WHERE id = $1 LIMIT 1;`,
 		id,
 	)
 
 	if err != nil {
-		return dao.GameStateDao{}, err
+		return domain.GameState{}, err
 	}
 
 	defer rows.Close()
 
-	var gameState dao.GameStateDao
+	var gameState domain.GameState
 	for rows.Next() {
 		err = rows.Scan(&gameState.Id, &gameState.UserId, &gameState.GamesPlayed, &gameState.Score)
 		if err != nil {
-			return dao.GameStateDao{}, err
+			return domain.GameState{}, err
 		}
 	}
 
 	err = rows.Err()
 	if err != nil {
-		return dao.GameStateDao{}, err
+		return domain.GameState{}, err
 	}
 
 	if gameState.Id.String() == "" {
-		return dao.GameStateDao{}, errors.New("user not found")
+		return domain.GameState{}, errors.New("user not found")
 	}
 
 	return gameState, nil
 }
 
-func (repo *GameStateRepository) GetByUserId(tx *sql.Tx, id string) (dao.GameStateDao, error) {
+func (repo *GameStateRepository) GetByUserId(tx *sql.Tx, id string) (domain.GameState, error) {
 	rows, err := tx.Query(
 		`SELECT * FROM game_state WHERE user_id = $1 LIMIT 1;`,
 		id,
 	)
 
 	if err != nil {
-		return dao.GameStateDao{}, err
+		return domain.GameState{}, err
 	}
 
 	defer rows.Close()
 
-	var gameState dao.GameStateDao
+	var gameState domain.GameState
 	for rows.Next() {
 		err = rows.Scan(&gameState.Id, &gameState.UserId, &gameState.GamesPlayed, &gameState.Score)
 		if err != nil {
-			return dao.GameStateDao{}, err
+			return domain.GameState{}, err
 		}
 	}
 
 	err = rows.Err()
 	if err != nil {
-		return dao.GameStateDao{}, err
+		return domain.GameState{}, err
 	}
 
 	if gameState.Id.String() == "" {
-		return dao.GameStateDao{}, errors.New("user not found")
+		return domain.GameState{}, errors.New("user not found")
 	}
 
 	return gameState, nil

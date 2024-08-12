@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"rest-api/controllers"
 	"rest-api/database"
 	"rest-api/repository"
@@ -13,15 +13,17 @@ import (
 )
 
 func main() {
-
-	settings.Validate()
+	err := settings.Validate()
+	if err != nil {
+		log.Fatal("Invalid settings for app:", err.Error())
+	}
 
 	db, err := database.GetConnection()
 	if err != nil {
-		panic(fmt.Sprintf("Could not get database connection: %s\n", err.Error()))
+		log.Fatal("Could not connect to database: ", err)
 	}
 
-	userService := services.UserService{ // make constructor
+	userService := services.UserService{
 		Db:              db,
 		UserRepo:        &repository.UserRepository{},
 		GameStateRepo:   &repository.GameStateRepository{},

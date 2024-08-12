@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"rest-api/dto"
 	"rest-api/services"
 
@@ -37,9 +38,9 @@ func (controller *GameStateConroller) SaveGameState(c *gin.Context) {
 
 	err = controller.UserService.UpdateGameState(uriParams.Id, request.GamesPlayed, request.Score)
 	if err != nil {
-		c.JSON(500, dto.ErrorDto{
-			Message: err.Error(),
-		})
+		log.Println("Error updating game state:", err.Error())
+		c.Error(err)
+		c.Status(500)
 		return
 	}
 
@@ -61,9 +62,9 @@ func (controller *GameStateConroller) GetSavedGameByUserId(c *gin.Context) {
 
 	gameState, err := controller.UserService.GetGameState(uriParams.Id)
 	if err != nil {
-		c.JSON(500, dto.ErrorDto{
-			Message: err.Error(),
-		})
+		log.Println("Error getting game state:", err.Error())
+		c.Error(err)
+		c.Status(500)
 		return
 	}
 
