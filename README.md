@@ -24,4 +24,3 @@ user interface for tx
 
 could not update friends
     "message": "pq: duplicate key value violates unique constraint \"game_friends_pkey\""
-# golang-rest-api-example
