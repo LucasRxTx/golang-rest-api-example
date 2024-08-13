@@ -1,6 +1,10 @@
 # Golang Web API Example
 
-This is for a code challenge
+This is my first attempt at building a Golang json API from scratch.  I choose to make an attempt in Golang so you can have an idea of how I might instinctually approach the problem.
+
+I did not use Copilot or any AI tools, and stuct to looking mostly at Gin's API documentation, Golangs official docs, and a few blog articals for project structure inspiration.
+
+
 ## Quick Start
 
 ```shell
@@ -74,6 +78,16 @@ For example
     - Notifiy the other user they are now friends
     - Give a promotional offer
 
+### Internationalization / Language Support
+
+Does the game have a broad international audiance?  If so, will the frontend be responsible for all text presented to the user, mapping backend messages, to messages suitable for the user, and in thier language, or should the API provided responses that are translated and user ready?
+
+This includes any string representations of numbers and dates.
+
+Language choice can be handled through the Language header which is automatically set by most browsers and is a list of languages ordered by the users preference.  In non-browser settings, it can manually be included in the Language header.
+
+If the company has a translation server/API we can integrate with that, or, we can use classic i19n gettext options, or other libraries.
+
 ## Personal notes about my implementation
 
 ### UUIDs
@@ -99,3 +113,15 @@ The validation library that comes with Gin left alot to be desired
 https://github.com/go-playground/validator
 
 The error messages returned reference the struct field names in go, which are not helpful when returned to the end user who will want to see the json field names.  The library gives no out of the box solution and expects you to implament your own handler.  I decided this was outside of the scope for a code interview due to time restraints.
+
+### Repeated db connection handling code
+
+There was repeated code for transaction handling that I tried to refactor into something reusable.  It kind of worked, but the Generics make the code noisy.  It is still a win over accidently missing a Rollback, but there is room for improvement.
+
+### Testing
+
+Concreat implamentations of sql.Db and sql.Transaction are used everywhere making it hard to test.  A wrapper should likely be used to allow a mock to be injected during testing.
+
+The API as it is now would not make much sense to test without a database since most of the logic is about storing and retreiving from a database.  Testing the code would result in mostly testing mocks and fakes.
+
+If I where to write tests for the system, I would write end to end tests (tests requiring the full system to be running, database included), minimal unit tests, and contract tests (Is the API returning data in a format that is expected given the spec).
