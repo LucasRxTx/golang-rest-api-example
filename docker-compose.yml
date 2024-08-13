@@ -15,6 +15,9 @@ services:
       - 127.0.0.1:8080:8080
     volumes:
       - .:/app
+    depends_on:
+      api-init:
+        condition: service_completed_successfully
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_USER=${DB_USER}
