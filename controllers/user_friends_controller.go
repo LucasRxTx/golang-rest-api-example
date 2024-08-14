@@ -32,7 +32,7 @@ func (controller *UserFriendsController) GetFriendsByUserId(c *gin.Context) {
 	}
 
 	friendsList := dto.UserFriendsListDto{}
-	friendsList.Freinds = []dto.UserFriendDto{} // todo: This shouldn't be manual
+	friendsList.Freinds = []dto.UserFriendDto{}
 	for _, friend := range userFriends {
 		friendsList.AddFriend(dto.UserFriendDto{
 			Id:        friend.Id.String(),
@@ -45,6 +45,10 @@ func (controller *UserFriendsController) GetFriendsByUserId(c *gin.Context) {
 }
 
 type UpdateFriendsRequest struct {
+	Friends []string `json:"friends" binding:"required"`
+}
+
+type UserFriendsDto struct {
 	Friends []string `json:"friends" binding:"required"`
 }
 

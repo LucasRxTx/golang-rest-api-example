@@ -92,7 +92,17 @@ func (userService *UserService) GetUserById(id string) (domain.User, error) {
 
 func (userService *UserService) CreateUser(name string) (uuid.UUID, error) {
 	transaction := func(tx *sql.Tx) (uuid.UUID, error) {
-		return userService.UserRepo.Create(tx, name)
+		userId, err := userService.UserRepo.Create(tx, name)
+		if err != nil {
+			return uuid.UUID{}, err
+		}
+
+		_, err = userService.GameStateRepo.Create(tx, userId.String(), 0, 0)
+		if err != nil {
+			return uuid.UUID{}, err
+		}
+
+		return userId, nil
 	}
 
 	fail := func(err error) (uuid.UUID, error) {

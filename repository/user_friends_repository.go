@@ -62,7 +62,7 @@ func (repo *UserFriendsRepository) Delete(tx *sql.Tx, userId string, friendId st
 
 func (repo *UserFriendsRepository) Update(tx *sql.Tx, id string, friends []string) error {
 	currentFriends, err := repo.GetAllForUserId(tx, id)
-
+	fmt.Printf("Friends: %v\n", currentFriends)
 	if err != nil {
 		return err
 	}

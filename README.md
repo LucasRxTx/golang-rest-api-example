@@ -15,6 +15,46 @@ Wait for init container to run and exit
 
 API is exposed on `localhost:8080`
 
+## Follow along
+
+The main entrypoint for the application is in `main.go`.
+
+The endpoints can be found in the controllers directory.  Here I have split the controllers into three seperate files, though once complete, found it would have probably made more sense to put them all under `user_controller.go` since all the functionality hangs off of the `/user` endpoint.
+
+Endpoints follow a pattern where user input is validated, a service is called, and the service response is turned into an appropriate respose for a json API.
+
+All of the buisness logic is grouped into services which should make creating tooling, such as CLI interfaces, easier.  A CLI would just need to validate user input from the CLI, call the same service, and return a response suitable for a CLI.
+
+The services are quite thin since there is very little application logic, or complex queries.  Each service call is grouped into a transaction (even queries).  This is to express the idea that every service call should be considered something that has a transaction boundry, and not simply a wrapper around a single repository call (which many service calls ended up being).
+
+The usefulness of the service pattern here ended up being minimal, but I committed to the idea since it is something I feel a larger project should evolve towards.
+
+I ended up with one service, since I feel the User object should be the aggragate through which all data is accessed and modified.  I didn't end up taking this concept as far as I would have liked, and kept having the nagging feeling I would have been much happier using a document datastore as a backend since thing about the table and queries ended up flavoring how I wanted my apps data model to work.
+
+It has been a while since I have used raw SQL instead of an ORM, but I tought this the perfect excuse to brush up on organizing code around raw sql queries.
+
+I abstracted all querying into repositories and overall am pleased with how it turned out, though I had hoped to end up with a more epressive user model, what I ended up with fits the scope of the project.
+
+```go
+// What I was thinking of achiving... is pretty much an ORM 😅
+//   Probably defeats the purpose of hand rolling all your own queries
+//   And should just use an ORM to begin with
+func unfriendPeopleBetterThanYou(userRepo IUserRepo) {
+    user := userRepo.Get("id")
+    for _, friend := range user.Friends() {
+        if friend.Score() > user.Score() {
+            user.Unfriend(friend)
+        }
+    }
+
+    // ...
+}
+```
+
+I will likely continue with this project to try and achive the above out of personal interest.
+
+https://github.com/LucasRxTx/golang-rest-api-example
+
 ## Improvements
 
 > Your friend asks for any suggestions you might have to improve the API in future versions of the game...
